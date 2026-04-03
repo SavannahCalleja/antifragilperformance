@@ -14,7 +14,7 @@
 }
 
 html {
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: 6.5rem;
   scroll-behavior: smooth;
 }
 
@@ -28,25 +28,30 @@ body {
   min-height: 100%;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
-  background-color: #060204;
+  background-color: #010101;
   background-image:
-    radial-gradient(ellipse 130% 90% at 50% -15%, rgba(255, 105, 180, 0.14), transparent 52%),
-    radial-gradient(ellipse 70% 50% at 15% 45%, rgba(128, 0, 0, 0.45), transparent 55%),
-    radial-gradient(ellipse 65% 55% at 92% 70%, rgba(255, 105, 180, 0.08), transparent 50%),
-    linear-gradient(185deg, #030102 0%, #120308 22%, #4a000c 52%, #800000 72%, #0f0204 100%);
+    radial-gradient(ellipse 100% 80% at 50% 0%, rgba(96, 0, 18, 0.35), transparent 55%),
+    linear-gradient(180deg, #140205 0%, #010101 45%, #000000 100%);
   background-attachment: fixed;
 }
 
-/* Hero: very dark black/maroon so white type reads like a spotlight */
-.hero-diamond-bg {
-  background: radial-gradient(
-    ellipse 95% 82% at 50% 42%,
-    #010101 0%,
-    #030202 35%,
-    #0c0204 62%,
-    #180206 88%,
-    #010000 100%
-  );
+/* Full-viewport hero: deep maroon into black, layered for depth */
+.hero-depth-bg {
+  background-color: #000000;
+  background-image:
+    radial-gradient(ellipse 150% 120% at 50% 120%, #000000 0%, transparent 42%),
+    radial-gradient(ellipse 95% 75% at 50% 40%, rgba(72, 0, 14, 0.5), transparent 62%),
+    radial-gradient(ellipse 70% 55% at 50% 22%, rgba(120, 0, 28, 0.28), transparent 58%),
+    linear-gradient(168deg, #6b0014 0%, #3a020c 18%, #160205 48%, #050102 78%, #000000 100%);
+}
+
+/* Full-height sections below hero: maroon hints into black */
+.section-depth-bg {
+  background-color: #010101;
+  background-image:
+    radial-gradient(ellipse 130% 85% at 50% 0%, rgba(88, 0, 20, 0.38), transparent 52%),
+    radial-gradient(ellipse 100% 65% at 50% 100%, #000000, transparent 48%),
+    linear-gradient(180deg, #1c0609 0%, #090203 50%, #000000 100%);
 }
 
 /* Diamond: crisp 1px hot pink outline, no glow */
