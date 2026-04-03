@@ -41,20 +41,31 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex w-full flex-1 flex-col items-center px-5 pb-16 pt-24 sm:px-8 sm:pt-28 md:pt-32">
-        {/* Hero */}
+        {/* Hero: diamond */}
         <section
           id="home"
-          className="scroll-mt-24 flex w-full max-w-4xl flex-col items-center text-center"
+          className="scroll-mt-24 relative left-1/2 w-screen max-w-none -translate-x-1/2"
         >
-          <p className="font-sans text-4xl font-bold tracking-[0.35em] text-[#E5E4E2] sm:text-5xl md:text-6xl md:tracking-[0.4em]">
-            ANTIFRAGIL
-          </p>
+          <div className="hero-diamond-bg flex w-full flex-col items-center px-5 pb-14 pt-6 sm:px-8 sm:pb-16 sm:pt-10 md:pb-20 md:pt-12">
+            <div className="relative flex h-[min(78vw,22rem)] w-[min(78vw,22rem)] max-h-[360px] max-w-[360px] items-center justify-center sm:h-[min(72vw,24rem)] sm:w-[min(72vw,24rem)]">
+              <div
+                className="diamond-outline pointer-events-none absolute inset-[10%] rotate-45"
+                aria-hidden
+              />
+              <div className="relative z-10 flex max-w-[12.5rem] flex-col items-center gap-5 text-center sm:max-w-[15rem]">
+                <h1 className="hero-diamond-wordmark font-sans text-[0.62rem] uppercase leading-snug sm:text-[0.72rem]">
+                  Antifragil Performance
+                </h1>
+                <p className="font-sans text-[0.62rem] font-medium tracking-[0.24em] text-[#E5E4E2] sm:text-[0.68rem]">
+                  Refined by Fire
+                </p>
+              </div>
+            </div>
 
-          <h1 className="hero-slogan mt-10 max-w-4xl font-sans text-lg font-semibold leading-snug tracking-[0.12em] sm:text-xl md:text-2xl">
-            ADAPT OR BREAK. THE CHOICE IS YOURS.
-          </h1>
-
-          <SignupForm />
+            <div className="mt-4 flex w-full max-w-4xl flex-col items-center text-center">
+              <SignupForm />
+            </div>
+          </div>
         </section>
 
         {/* Why Antifragil: distinct section below hero */}
