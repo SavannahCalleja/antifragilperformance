@@ -4,12 +4,48 @@ function Roman({ children }: { children: React.ReactNode }) {
   return <span className="roman-numeral">{children}</span>;
 }
 
+function PlaceholderSection({
+  id,
+  title,
+  kicker,
+}: {
+  id: string;
+  title: string;
+  kicker: string;
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className="scroll-mt-24 w-full max-w-6xl px-5 py-20 sm:px-8 md:py-28"
+    >
+      <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-black/20 p-10 text-center backdrop-blur-sm sm:p-14">
+        <p className="mb-3 font-sans text-[0.65rem] font-semibold tracking-[0.2em] text-[#E5E4E2]/55">
+          {kicker}
+        </p>
+        <h2
+          id={`${id}-heading`}
+          className="font-sans text-xl font-bold tracking-[0.18em] text-[#E5E4E2] sm:text-2xl"
+        >
+          {title}
+        </h2>
+        <p className="mt-6 text-sm leading-relaxed text-[#E5E4E2]/75 sm:text-base">
+          Content coming soon. Check back as we build the system.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="flex w-full flex-1 flex-col items-center px-5 py-16 sm:px-8 md:py-20">
+      <main className="flex w-full flex-1 flex-col items-center px-5 pb-16 pt-24 sm:px-8 sm:pt-28 md:pt-32">
         {/* Hero */}
-        <section className="flex w-full max-w-4xl flex-col items-center text-center">
+        <section
+          id="home"
+          className="scroll-mt-24 flex w-full max-w-4xl flex-col items-center text-center"
+        >
           <p className="font-sans text-4xl font-bold tracking-[0.35em] text-[#E5E4E2] sm:text-5xl md:text-6xl md:tracking-[0.4em]">
             ANTIFRAGIL
           </p>
@@ -21,11 +57,16 @@ export default function Home() {
           <SignupForm />
         </section>
 
-        {/* Why Antifragil */}
+        {/* Why Antifragil: distinct section below hero */}
         <section
+          id="why-antifragil"
           aria-labelledby="why-heading"
-          className="mt-24 w-full max-w-6xl border-t border-white/10 pt-20 md:mt-32 md:pt-28"
+          className="scroll-mt-24 mt-20 w-full max-w-6xl md:mt-28"
         >
+          <div className="mb-14 flex justify-center md:mb-16">
+            <div className="h-px w-24 bg-gradient-to-r from-transparent via-[#FF69B4]/40 to-transparent md:w-32" aria-hidden />
+          </div>
+
           <h2
             id="why-heading"
             className="mb-14 text-center font-sans text-2xl font-bold tracking-[0.2em] text-[#E5E4E2] sm:text-3xl md:mb-16 md:text-4xl md:tracking-[0.24em]"
@@ -34,7 +75,7 @@ export default function Home() {
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-            <article className="flex flex-col rounded-lg border border-white/10 bg-black/15 p-8 text-left backdrop-blur-sm md:p-10">
+            <article className="flex flex-col rounded-lg border border-white/10 bg-black/20 p-8 text-left backdrop-blur-sm md:p-10">
               <h3 className="mb-4 font-sans text-sm font-bold tracking-[0.18em] text-[#E5E4E2] sm:text-base">
                 <Roman>I.</Roman> THE MISSION
               </h3>
@@ -43,7 +84,7 @@ export default function Home() {
               </p>
             </article>
 
-            <article className="flex flex-col rounded-lg border border-white/10 bg-black/15 p-8 text-left backdrop-blur-sm md:p-10">
+            <article className="flex flex-col rounded-lg border border-white/10 bg-black/20 p-8 text-left backdrop-blur-sm md:p-10">
               <h3 className="mb-4 font-sans text-sm font-bold tracking-[0.18em] text-[#E5E4E2] sm:text-base">
                 <Roman>II.</Roman> THE VISION
               </h3>
@@ -58,7 +99,7 @@ export default function Home() {
               className="pointer-events-none absolute inset-x-0 -top-6 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent md:-top-8"
               aria-hidden
             />
-            <div className="rounded-xl border border-white/[0.08] bg-[#1a0406]/80 px-6 py-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-10 sm:py-14 md:px-14 md:py-16">
+            <div className="rounded-xl border border-white/[0.08] bg-black/30 px-6 py-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm sm:px-10 sm:py-14 md:px-14 md:py-16">
               <h3 className="mb-10 text-center font-sans text-sm font-bold tracking-[0.16em] text-[#E5E4E2] sm:mb-12 sm:text-base md:text-lg">
                 <Roman>III.</Roman> THE ARCHITECT: SAVANNAH CALLEJA
               </h3>
@@ -100,6 +141,10 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <PlaceholderSection id="the-app" kicker="THE APP" title="The App" />
+        <PlaceholderSection id="blog" kicker="BLOG" title="Blog" />
+        <PlaceholderSection id="merch" kicker="MERCH" title="Merch" />
       </main>
 
       <footer className="shrink-0 px-6 pb-10 text-center font-mono text-xs tracking-wide text-[#E5E4E2]/65">
