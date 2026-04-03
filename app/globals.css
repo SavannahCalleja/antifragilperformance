@@ -52,3 +52,19 @@ body {
   outline: 2px solid #ff69b4;
   outline-offset: 3px;
 }
+
+/* Roman numerals (section labels) */
+.roman-numeral {
+  color: var(--hot-pink);
+  font-weight: 700;
+}
+
+/* Faith callout: bold + hot pink glow */
+.callout-comfort {
+  color: var(--hot-pink);
+  font-weight: 700;
+  text-shadow:
+    0 0 10px rgba(255, 105, 180, 0.9),
+    0 0 24px rgba(255, 105, 180, 0.5),
+    0 0 40px rgba(255, 105, 180, 0.3);
+}
