@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #800000;
+  --foreground: #e5e4e2;
+  --hot-pink: #ff69b4;
 }
 
 @theme inline {
@@ -12,15 +13,42 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Hot pink slogan glow */
+.hero-slogan {
+  color: var(--hot-pink);
+  text-shadow:
+    0 0 12px rgba(255, 105, 180, 0.85),
+    0 0 28px rgba(255, 105, 180, 0.45),
+    0 0 48px rgba(255, 105, 180, 0.25);
+}
+
+/* Join button — idle + hover glow */
+.btn-join {
+  background: #ff69b4;
+  color: #1a0508;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 rgba(255, 105, 180, 0);
+  transition:
+    box-shadow 0.35s ease,
+    transform 0.2s ease,
+    filter 0.35s ease;
+}
+
+.btn-join:hover {
+  box-shadow:
+    0 0 20px rgba(255, 105, 180, 0.9),
+    0 0 40px rgba(255, 105, 180, 0.55),
+    0 0 64px rgba(255, 105, 180, 0.35);
+  filter: brightness(1.08);
+}
+
+.btn-join:focus-visible {
+  outline: 2px solid #ff69b4;
+  outline-offset: 3px;
 }
