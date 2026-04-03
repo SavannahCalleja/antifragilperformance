@@ -47,16 +47,16 @@ export default function Home() {
           className="scroll-mt-24 relative left-1/2 w-screen max-w-none -translate-x-1/2"
         >
           <div className="hero-diamond-bg flex w-full flex-col items-center px-5 pb-14 pt-6 sm:px-8 sm:pb-16 sm:pt-10 md:pb-20 md:pt-12">
-            <div className="relative flex h-[min(78vw,22rem)] w-[min(78vw,22rem)] max-h-[360px] max-w-[360px] items-center justify-center sm:h-[min(72vw,24rem)] sm:w-[min(72vw,24rem)]">
+            <div className="relative flex h-[min(92vw,28rem)] w-[min(92vw,28rem)] max-h-[440px] max-w-[440px] items-center justify-center md:h-[min(80vw,32rem)] md:w-[min(80vw,32rem)] md:max-h-[480px] md:max-w-[480px]">
               <div
-                className="diamond-outline pointer-events-none absolute inset-[10%] rotate-45"
+                className="diamond-outline pointer-events-none absolute inset-[8%] rotate-45"
                 aria-hidden
               />
-              <div className="relative z-10 flex max-w-[12.5rem] flex-col items-center gap-5 text-center sm:max-w-[15rem]">
-                <h1 className="hero-diamond-wordmark font-sans text-[0.62rem] uppercase leading-snug sm:text-[0.72rem]">
+              <div className="relative z-10 flex max-w-[16rem] flex-col items-center gap-3 px-4 text-center sm:max-w-[20rem] sm:gap-3.5 md:max-w-[24rem]">
+                <h1 className="hero-diamond-wordmark font-sans text-2xl leading-[0.92] uppercase sm:text-3xl md:text-4xl md:leading-[0.9]">
                   Antifragil Performance
                 </h1>
-                <p className="font-sans text-[0.62rem] font-medium tracking-[0.24em] text-[#E5E4E2] sm:text-[0.68rem]">
+                <p className="font-sans text-[0.65rem] font-bold uppercase leading-tight tracking-[0.08em] text-[#E5E4E2] sm:text-xs md:text-sm">
                   Refined by Fire
                 </p>
               </div>
