@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { InstallGuide } from "./install-guide";
 import { SiteNav } from "./site-nav";
+import { WelcomeScreen } from "./welcome-screen";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <WelcomeScreen />
         <SiteNav />
         {children}
         <InstallGuide />
