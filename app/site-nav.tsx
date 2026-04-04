@@ -24,10 +24,10 @@ export function SiteNav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 border-b border-[#E5E4E2]/40 shadow-[0_6px_28px_rgba(0,0,0,0.55)] transition-[background-color,backdrop-filter] duration-300 ${
         scrolled
-          ? "border-b border-white/10 bg-[#800000]/82 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
+          ? "bg-[#800000]/93 backdrop-blur-md"
+          : "bg-[#070205]/88 backdrop-blur-md"
       }`}
     >
       <nav
