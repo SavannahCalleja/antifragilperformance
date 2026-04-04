@@ -31,18 +31,24 @@ export function SiteNav() {
       }`}
     >
       <nav
-        className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-5 py-5 md:gap-x-12 md:gap-y-3 md:px-8 md:py-6 lg:gap-x-14"
+        className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-5 md:py-5"
         aria-label="Primary"
       >
-        {links.map(({ href, label }) => (
-          <a
-            key={href}
-            href={href}
-            className="text-[0.8rem] font-semibold tracking-[0.22em] text-[#E5E4E2]/92 transition-colors hover:text-white sm:text-[0.85rem] md:text-[0.95rem] md:tracking-[0.28em]"
-          >
-            {label}
-          </a>
-        ))}
+        <ul className="m-0 grid w-full grid-cols-5 list-none gap-0 p-0">
+          {links.map(({ href, label }, index) => (
+            <li
+              key={href}
+              className={`min-w-0 ${index > 0 ? "border-l border-[#E5E4E2]/35" : ""}`}
+            >
+              <a
+                href={href}
+                className="flex min-h-[3rem] w-full items-center justify-center px-2 py-3 text-center text-[0.58rem] font-medium uppercase leading-tight tracking-widest text-[#E5E4E2] transition-[background-color,color] duration-200 sm:min-h-[3.25rem] sm:px-3 sm:text-[0.65rem] md:min-h-0 md:px-4 md:py-4 md:text-xs hover:bg-[#5c000e]/55 hover:text-[#E5E4E2]"
+              >
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
       </nav>
     </header>
   );

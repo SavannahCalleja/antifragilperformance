@@ -144,10 +144,10 @@ export default function Home() {
                       Currently in the US, there is an epidemic of inactivity and a culture of comfort.
                     </p>
                     <p className="callout-comfort my-8 text-center text-base tracking-[0.12em] sm:my-10 sm:text-lg">
-                      comfort is the greatest sin
+                      Comfort is our greatest enemy.
                     </p>
                     <p className="text-[0.95rem] leading-relaxed text-[#E5E4E2] sm:text-base">
-                      I believe that we can commit this sin as humans because it prevents us from reaching our true potential. This is why faith is a vital component of this company. As believers in Jesus, we are called to live a life that might look &quot;uncomfortable&quot; to others, but it is exactly what allows us to thrive.
+                      I believe it is what most often keeps us from reaching our true potential. This is why faith is a vital component of this company. As believers in Jesus, we are called to live a life that might look &quot;uncomfortable&quot; to others, but it is exactly what allows us to thrive.
                     </p>
                   </div>
                 </div>
