@@ -1,3 +1,4 @@
+import { AppSection } from "./app-section";
 import { SignupForm } from "./signup-form";
 
 function Roman({ children }: { children: React.ReactNode }) {
@@ -160,7 +161,7 @@ export default function Home() {
           </div>
         </section>
 
-        <PlaceholderSection id="the-app" kicker="THE APP" title="The App" />
+        <AppSection />
         <PlaceholderSection id="blog" kicker="BLOG" title="Blog" />
         <PlaceholderSection id="merch" kicker="MERCH" title="Merch" />
       </main>
