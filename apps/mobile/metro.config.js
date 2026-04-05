@@ -2,7 +2,12 @@ const path = require('path');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const projectRoot = __dirname;
-const sharedPackageRoot = path.resolve(projectRoot, 'packages/antifragil-shared-api');
+const monorepoRoot = path.resolve(projectRoot, '../..');
+const sharedPackageRoot = path.join(
+  monorepoRoot,
+  'packages',
+  'antifragil-shared-api',
+);
 
 /**
  * Metro configuration
@@ -12,6 +17,12 @@ const sharedPackageRoot = path.resolve(projectRoot, 'packages/antifragil-shared-
  */
 const config = {
   watchFolders: [sharedPackageRoot],
+  resolver: {
+    nodeModulesPaths: [
+      path.resolve(projectRoot, 'node_modules'),
+      path.resolve(monorepoRoot, 'node_modules'),
+    ],
+  },
 };
 
 module.exports = mergeConfig(getDefaultConfig(projectRoot), config);

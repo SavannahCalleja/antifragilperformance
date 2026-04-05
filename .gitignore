@@ -1,9 +1,8 @@
 # OSX
-#
 .DS_Store
+*.pem
 
 # Xcode
-#
 build/
 *.pbxuser
 !default.pbxuser
@@ -22,9 +21,7 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 
-# Android/IntelliJ
-#
-build/
+# Android / IntelliJ
 .idea
 .gradle
 local.properties
@@ -35,44 +32,52 @@ local.properties
 !debug.keystore
 .kotlin/
 
-# Env (secrets)
-.env
-
-# node.js
-#
-node_modules/
-npm-debug.log
-yarn-error.log
-
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/
-
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
-
-# Bundle artifact
-*.jsbundle
-
 # Ruby / CocoaPods
 **/Pods/
-/vendor/bundle/
+**/vendor/bundle/
 
-# Temporary files created by Metro to check the health of the file watcher
+# Metro
 .metro-health-check*
 
-# testing
-/coverage
+# JavaScript / Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.pnp
+.pnp.*
 
-# Yarn
+# Yarn (Berry)
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Testing
+coverage/
+
+# React Native bundle
+*.jsbundle
+
+# fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Next.js / Vercel (web)
+.next/
+out/
+build/
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+
+# Env and secrets (mobile + web)
+.env
+.env.*
+!.env.example
