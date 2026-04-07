@@ -41,36 +41,11 @@ export function WebAppGate() {
     window.history.replaceState({}, "", path || "/");
   }, []);
 
-  /** Supabase bootstrap — marketing home; signed-in users get a profile-loading overlay. */
-  if (!authReady) {
-    return (
-      <>
-        <MarketingLanding
-          signedIn={Boolean(session)}
-          userEmail={session?.user?.email ?? null}
-          onLogin={() => setAuthOpen("login")}
-          onSignup={() => setAuthOpen("signup")}
-          onSignOut={() => void signOut()}
-        />
-        {session ? (
-          <div className="fixed inset-0 z-[85] flex flex-col items-center justify-center bg-[#030303]/88 backdrop-blur-sm">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#FF69B4]">
-              Loading your profile…
-            </p>
-          </div>
-        ) : null}
-        {authOpen ? (
-          <AuthOverlay
-            mode={authOpen}
-            onClose={() => setAuthOpen(null)}
-            onSwitchMode={(m) => setAuthOpen(m)}
-          />
-        ) : null}
-      </>
-    );
-  }
-
-  if (!session) {
+  /**
+   * Public shell: always show the marketing landing with Login / Create Account until we know
+   * the user is signed in *and* auth has finished bootstrapping. No blocking “loading profile” layer.
+   */
+  if (!authReady || !session) {
     return (
       <>
         <MarketingLanding
