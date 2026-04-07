@@ -28,7 +28,7 @@ export function OnboardingNavigator() {
       <Stack.Screen
         name="MmaLevel"
         component={MmaLevelScreen}
-        options={{ title: 'MMA level' }}
+        options={{ title: 'Your role' }}
       />
       <Stack.Screen
         name="ProfileSetup"

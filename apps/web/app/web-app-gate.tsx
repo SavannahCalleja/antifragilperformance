@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { profileNeedsSetup } from "@antifragil/shared-api";
 import { AuthOverlay, type AuthOverlayMode } from "./auth-overlay";
 import { MarketingLanding } from "./marketing-landing";
@@ -8,6 +9,7 @@ import { useAuth } from "./auth-provider";
 import { WebOnboarding } from "./web-onboarding";
 
 export function WebAppGate() {
+  const router = useRouter();
   const { session, profile, initializing, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState<AuthOverlayMode | null>(null);
 
@@ -15,6 +17,15 @@ export function WebAppGate() {
     if (!session) return;
     queueMicrotask(() => setAuthOpen(null));
   }, [session]);
+
+  /** Coaches with a completed profile use /coach-dashboard instead of the public home shell. */
+  useEffect(() => {
+    if (initializing) return;
+    if (!session || !profile || profileNeedsSetup(profile)) return;
+    if (profile.role === "coach") {
+      router.replace("/coach-dashboard");
+    }
+  }, [initializing, session, profile, router]);
 
   if (initializing) {
     return (

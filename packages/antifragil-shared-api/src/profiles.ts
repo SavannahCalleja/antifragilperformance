@@ -6,20 +6,21 @@ export type CompletedProfilePayload = {
   full_name: string;
   gender: string;
   age: number;
-  weight_lb: number;
-  height_in: number;
-  /** Stored lowercase to satisfy the DB CHECK (`professional` | `amateur`). */
+  /** Fighters only; coaches omit (null in DB). */
+  weight_lb: number | null;
+  height_in: number | null;
+  /** Stored lowercase (`professional` | `amateur` | `coach`). */
   mma_level: MmaLevel;
-  /** Preserve coach role when updating an existing staff row */
+  /** Optional hint when not inferrable from `mma_level` (e.g. staff row). */
   role?: ProfileRole | string;
 };
 
 function mmaLevelForDatabase(raw: string): { value: MmaLevel } | { error: string } {
   const v = raw.trim().toLowerCase();
-  if (v === 'professional' || v === 'amateur') {
+  if (v === 'professional' || v === 'amateur' || v === 'coach') {
     return { value: v };
   }
-  return { error: 'mma_level must be professional or amateur (lowercase)' };
+  return { error: 'mma_level must be professional, amateur, or coach (lowercase)' };
 }
 
 /**
@@ -42,8 +43,12 @@ export async function upsertCompletedProfile(
   }
   const { value: mma_level } = mma;
 
-  const role =
-    payload.role === 'coach' || payload.role === 'athlete' ? payload.role : 'athlete';
+  const role: ProfileRole =
+    mma_level === 'coach'
+      ? 'coach'
+      : payload.role === 'coach'
+        ? 'coach'
+        : 'athlete';
 
   const { error } = await supabase.from(TABLES.profiles).upsert(
     {

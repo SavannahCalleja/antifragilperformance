@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
+import { MMA_LEVEL_COACH } from '@antifragil/shared-api';
 import { upsertCompletedProfile } from '../../api/commandCenter';
 import { useAuth } from '../../context/AuthContext';
 import { getSupabase } from '../../lib/supabase';
@@ -50,35 +51,37 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
   const [heightStr, setHeightStr] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const isCoach = mmaLevel === MMA_LEVEL_COACH;
+
   const canFinish = useMemo(() => {
     const age = parsePositiveInt(ageStr);
     const w = parsePositiveFloat(weightStr);
     const h = parsePositiveFloat(heightStr);
-    return (
+    const basics =
       fullName.trim().length > 0 &&
       gender.length > 0 &&
       age !== null &&
-      age <= 120 &&
+      age <= 120;
+    if (isCoach) return basics;
+    return (
+      basics &&
       w !== null &&
       w < 2000 &&
       h !== null &&
       h < 120
     );
-  }, [fullName, gender, ageStr, weightStr, heightStr]);
+  }, [fullName, gender, ageStr, weightStr, heightStr, isCoach]);
 
   const onFinish = async () => {
     const age = parsePositiveInt(ageStr);
-    const weightLb = parsePositiveFloat(weightStr);
-    const heightIn = parsePositiveFloat(heightStr);
-    if (
-      !userId ||
-      !fullName.trim() ||
-      age === null ||
-      weightLb === null ||
-      heightIn === null ||
-      !gender
-    ) {
-      Alert.alert('Check fields', 'Enter your name, gender, age, weight, and height.');
+    const weightLb = isCoach ? null : parsePositiveFloat(weightStr);
+    const heightIn = isCoach ? null : parsePositiveFloat(heightStr);
+    if (!userId || !fullName.trim() || age === null || !gender) {
+      Alert.alert('Check fields', 'Enter your name, gender, and age.');
+      return;
+    }
+    if (!isCoach && (weightLb === null || heightIn === null)) {
+      Alert.alert('Check fields', 'Enter your weight and height.');
       return;
     }
 
@@ -89,8 +92,8 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
     }
 
     setSubmitting(true);
-    const role =
-      profile?.role === 'coach' || profile?.role === 'athlete' ? profile.role : 'athlete';
+    const roleHint =
+      profile?.role === 'coach' || profile?.role === 'athlete' ? profile.role : undefined;
 
     const { error } = await upsertCompletedProfile(supabase, userId, {
       full_name: fullName.trim(),
@@ -99,7 +102,7 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
       weight_lb: weightLb,
       height_in: heightIn,
       mma_level: mmaLevel,
-      role,
+      role: roleHint,
     });
 
     if (error) {
@@ -128,10 +131,11 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
           </TouchableOpacity>
 
           <Text style={styles.kicker}>STEP 2</Text>
-          <Text style={styles.headline}>Your bio</Text>
+          <Text style={styles.headline}>{isCoach ? 'Coach profile' : 'Your bio'}</Text>
           <Text style={styles.sub}>
-            Name, gender, age, weight, and height. Saving unlocks the Command Center
-            (profile_setup_complete).
+            {isCoach
+              ? 'Name, gender, and age. Weight and height stay off your record. Saving unlocks the team dashboard.'
+              : 'Name, gender, age, weight, and height. Saving unlocks the Command Center (profile_setup_complete).'}
           </Text>
 
           <Text style={styles.label}>NAME</Text>
@@ -171,25 +175,29 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
             keyboardType="number-pad"
           />
 
-          <Text style={styles.label}>WEIGHT (LB)</Text>
-          <TextInput
-            style={styles.input}
-            value={weightStr}
-            onChangeText={setWeightStr}
-            placeholder="Pounds"
-            placeholderTextColor={cc.dim}
-            keyboardType="decimal-pad"
-          />
+          {!isCoach ? (
+            <>
+              <Text style={styles.label}>WEIGHT (LB)</Text>
+              <TextInput
+                style={styles.input}
+                value={weightStr}
+                onChangeText={setWeightStr}
+                placeholder="Pounds"
+                placeholderTextColor={cc.dim}
+                keyboardType="decimal-pad"
+              />
 
-          <Text style={styles.label}>HEIGHT (IN)</Text>
-          <TextInput
-            style={styles.input}
-            value={heightStr}
-            onChangeText={setHeightStr}
-            placeholder="Total inches"
-            placeholderTextColor={cc.dim}
-            keyboardType="decimal-pad"
-          />
+              <Text style={styles.label}>HEIGHT (IN)</Text>
+              <TextInput
+                style={styles.input}
+                value={heightStr}
+                onChangeText={setHeightStr}
+                placeholder="Total inches"
+                placeholderTextColor={cc.dim}
+                keyboardType="decimal-pad"
+              />
+            </>
+          ) : null}
 
           <TouchableOpacity
             style={[styles.primary, (!canFinish || submitting) && styles.primaryDisabled]}
@@ -199,7 +207,9 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
             {submitting ? (
               <ActivityIndicator color="#000" />
             ) : (
-              <Text style={styles.primaryText}>SAVE & ENTER COMMAND CENTER</Text>
+              <Text style={styles.primaryText}>
+                {isCoach ? 'SAVE & OPEN TEAM DASHBOARD' : 'SAVE & ENTER COMMAND CENTER'}
+              </Text>
             )}
           </TouchableOpacity>
 

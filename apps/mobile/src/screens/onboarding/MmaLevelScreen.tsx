@@ -1,14 +1,21 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
-import { MMA_LEVEL_AMATEUR, MMA_LEVEL_PROFESSIONAL } from '@antifragil/shared-api';
+import {
+  MMA_LEVEL_AMATEUR,
+  MMA_LEVEL_COACH,
+  MMA_LEVEL_PROFESSIONAL,
+} from '@antifragil/shared-api';
 import { cc } from '../../theme/commandCenter';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'MmaLevel'>;
 
-type MmaChoice = typeof MMA_LEVEL_PROFESSIONAL | typeof MMA_LEVEL_AMATEUR;
+type MmaChoice =
+  | typeof MMA_LEVEL_PROFESSIONAL
+  | typeof MMA_LEVEL_AMATEUR
+  | typeof MMA_LEVEL_COACH;
 
 export function MmaLevelScreen({ navigation }: Props) {
   const goBio = (mmaLevel: MmaChoice) => {
@@ -17,12 +24,16 @@ export function MmaLevelScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom', 'left', 'right']}>
-      <View style={styles.inner}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.kicker}>STEP 1</Text>
-        <Text style={styles.title}>MMA LEVEL</Text>
+        <Text style={styles.title}>YOUR ROLE</Text>
         <Text style={styles.sub}>
-          Choose your tier first. Next you&apos;ll add your bio—only then you enter the Command
-          Center.
+          Fighter tier or coach access. Coaches skip weight and height—next you&apos;ll confirm your
+          bio, then open the right dashboard.
         </Text>
 
         <TouchableOpacity
@@ -46,14 +57,33 @@ export function MmaLevelScreen({ navigation }: Props) {
           <Text style={styles.cardAmLabel}>AMATEUR</Text>
           <Text style={styles.cardAmHint}>Development · sanctioned amateur · skill building</Text>
         </TouchableOpacity>
-      </View>
+
+        <TouchableOpacity
+          style={styles.cardCoach}
+          onPress={() => goBio(MMA_LEVEL_COACH)}
+          activeOpacity={0.92}
+          accessibilityRole="button"
+          accessibilityLabel="Coach"
+        >
+          <Text style={styles.cardCoachLabel}>COACH</Text>
+          <Text style={styles.cardCoachHint}>
+            Strength &amp; conditioning · roster · team dashboard (no fighter biometrics)
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#000' },
-  inner: { flex: 1, paddingHorizontal: 20, paddingTop: 12, justifyContent: 'center' },
+  scroll: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 28,
+    justifyContent: 'center',
+  },
   kicker: {
     color: cc.accent,
     fontSize: 11,
@@ -81,7 +111,7 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 20,
     marginBottom: 16,
-    minHeight: 140,
+    minHeight: 132,
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: '#fff',
@@ -104,7 +134,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 36,
     paddingHorizontal: 20,
-    minHeight: 140,
+    marginBottom: 16,
+    minHeight: 132,
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: '#fff',
@@ -116,6 +147,29 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
   },
   cardAmHint: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 10,
+    lineHeight: 18,
+  },
+  cardCoach: {
+    backgroundColor: '#0a0508',
+    borderRadius: 4,
+    paddingVertical: 36,
+    paddingHorizontal: 20,
+    minHeight: 132,
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: cc.accent,
+  },
+  cardCoachLabel: {
+    color: cc.accent,
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 3,
+  },
+  cardCoachHint: {
     color: 'rgba(255,255,255,0.55)',
     fontSize: 13,
     fontWeight: '600',

@@ -1,3 +1,5 @@
+import type { MmaLevel } from '@antifragil/shared-api';
+
 export type AuthStackParamList = {
   Home: undefined;
   Login: undefined;
@@ -13,8 +15,6 @@ export type AppStackParamList = {
   AthleteRoster: undefined;
   ReviewData: undefined;
 };
-
-import type { MmaLevel } from '@antifragil/shared-api';
 
 export type OnboardingStackParamList = {
   /** First step after email verify: tier before bio (profile_setup_complete stays false until bio save). */

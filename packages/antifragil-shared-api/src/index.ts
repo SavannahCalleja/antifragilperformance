@@ -4,7 +4,7 @@ export {
   EXERCISE_SELECT,
 } from './schema';
 export type { MmaLevel, ProfileRole, ProfileRow, ExerciseRow } from './types';
-export { MMA_LEVEL_AMATEUR, MMA_LEVEL_PROFESSIONAL } from './types';
+export { MMA_LEVEL_AMATEUR, MMA_LEVEL_COACH, MMA_LEVEL_PROFESSIONAL } from './types';
 export {
   fetchProfile,
   fetchAthleteProfiles,
