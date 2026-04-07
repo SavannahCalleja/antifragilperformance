@@ -41,24 +41,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = getSupabase();
     if (!supabase) {
-      queueMicrotask(() => setInitializing(false));
+      setInitializing(false);
       return;
     }
 
-    let cancelled = false;
+    /** False after this effect cleans up (incl. React Strict Mode remount). Avoids stuck loading. */
+    let active = true;
+
+    const safetyTimer = window.setTimeout(() => {
+      setInitializing((stillLoading) => {
+        if (!stillLoading) return stillLoading;
+        console.warn(
+          "[AuthProvider] Session init is taking too long; continuing without a session. Check network and Supabase env.",
+        );
+        return false;
+      });
+    }, 12_000);
 
     void (async () => {
-      const {
-        data: { session: s },
-      } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setSession(s);
-      if (s?.user?.id) {
-        await loadProfile(s.user.id);
-      } else {
-        setProfile(null);
+      try {
+        const {
+          data: { session: s },
+        } = await supabase.auth.getSession();
+        if (!active) return;
+        setSession(s);
+        if (s?.user?.id) {
+          await loadProfile(s.user.id);
+        } else {
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error("[AuthProvider] Initial session load failed", err);
+        if (active) {
+          setSession(null);
+          setProfile(null);
+        }
+      } finally {
+        window.clearTimeout(safetyTimer);
+        if (active) setInitializing(false);
       }
-      if (!cancelled) setInitializing(false);
     })();
 
     const {
@@ -73,7 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      cancelled = true;
+      active = false;
+      window.clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, [loadProfile]);
