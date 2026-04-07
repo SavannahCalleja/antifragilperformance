@@ -11,13 +11,13 @@ import { WebOnboarding } from "./web-onboarding";
 
 export function WebAppGate() {
   const router = useRouter();
-  const { session, profile, initializing, signOut } = useAuth();
+  const { session, profile, authReady, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState<AuthOverlayMode | null>(null);
 
   const dashboardHref = useMemo(() => {
-    if (!session || !profile || profileNeedsSetup(profile)) return null;
+    if (!authReady || !session) return null;
     return resolveDashboardHref(profile);
-  }, [session, profile]);
+  }, [authReady, session, profile]);
 
   useLayoutEffect(() => {
     if (!dashboardHref) return;
@@ -41,74 +41,90 @@ export function WebAppGate() {
     window.history.replaceState({}, "", path || "/");
   }, []);
 
-  if (initializing) {
+  /** Supabase bootstrap — marketing home; signed-in users get a profile-loading overlay. */
+  if (!authReady) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-black text-[#FF69B4]">
-        <p className="text-sm font-semibold uppercase tracking-widest">Loading…</p>
-      </div>
+      <>
+        <MarketingLanding
+          signedIn={Boolean(session)}
+          userEmail={session?.user?.email ?? null}
+          onLogin={() => setAuthOpen("login")}
+          onSignup={() => setAuthOpen("signup")}
+          onSignOut={() => void signOut()}
+        />
+        {session ? (
+          <div className="fixed inset-0 z-[85] flex flex-col items-center justify-center bg-[#030303]/88 backdrop-blur-sm">
+            <p className="text-sm font-semibold uppercase tracking-widest text-[#FF69B4]">
+              Loading your profile…
+            </p>
+          </div>
+        ) : null}
+        {authOpen ? (
+          <AuthOverlay
+            mode={authOpen}
+            onClose={() => setAuthOpen(null)}
+            onSwitchMode={(m) => setAuthOpen(m)}
+          />
+        ) : null}
+      </>
     );
   }
 
-  if (session && profileNeedsSetup(profile)) {
+  if (!session) {
+    return (
+      <>
+        <MarketingLanding
+          signedIn={false}
+          userEmail={null}
+          onLogin={() => setAuthOpen("login")}
+          onSignup={() => setAuthOpen("signup")}
+          onSignOut={() => void signOut()}
+        />
+        {authOpen ? (
+          <AuthOverlay
+            mode={authOpen}
+            onClose={() => setAuthOpen(null)}
+            onSwitchMode={(m) => setAuthOpen(m)}
+          />
+        ) : null}
+      </>
+    );
+  }
+
+  if (profileNeedsSetup(profile)) {
     return <WebOnboarding />;
   }
 
-  if (session && profile) {
-    const r = profile.role;
-    if (r !== "coach" && r !== "athlete") {
-      return (
-        <div className="flex min-h-dvh flex-col items-center justify-center bg-[#030303] px-6 text-center text-[#E5E4E2]">
-          <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.28em] text-[#FF69B4]">
-            Command Center
-          </p>
-          <h1 className="mb-4 max-w-md font-sans text-lg font-bold tracking-wide">
-            Profile role not set
-          </h1>
-          <p className="mb-8 max-w-md text-sm text-[#E5E4E2]/70">
-            Your account needs role <span className="text-[#E5E4E2]">coach</span> or{" "}
-            <span className="text-[#E5E4E2]">athlete</span> in the database. Ask your admin, then sign
-            in again.
-          </p>
-          <button
-            type="button"
-            onClick={() => void signOut()}
-            className="btn-join min-h-12 rounded-md px-10 text-sm font-semibold uppercase tracking-wide"
-          >
-            Sign out
-          </button>
-        </div>
-      );
-    }
+  if (profile && !resolveDashboardHref(profile)) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[#030303] px-6 text-center text-[#E5E4E2]">
+        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.28em] text-[#FF69B4]">
+          Command Center
+        </p>
+        <h1 className="mb-4 max-w-md font-sans text-lg font-bold tracking-wide">Can’t open dashboard</h1>
+        <p className="mb-8 max-w-md text-sm text-[#E5E4E2]/70">
+          Your profile is complete, but the app couldn’t determine fighter vs coach routing. Check{" "}
+          <span className="text-[#E5E4E2]">role</span> and <span className="text-[#E5E4E2]">mma_level</span>{" "}
+          in Supabase.
+        </p>
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="btn-join min-h-12 rounded-md px-10 text-sm font-semibold uppercase tracking-wide"
+        >
+          Sign out
+        </button>
+      </div>
+    );
   }
 
   if (dashboardHref) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[#030303] text-[#FF69B4]">
-        <p className="text-sm font-semibold uppercase tracking-widest">
-          Opening Command Center…
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-widest">Opening dashboard…</p>
       </div>
     );
   }
 
-  const signedIn = Boolean(session);
-
-  return (
-    <>
-      <MarketingLanding
-        signedIn={signedIn}
-        userEmail={session?.user?.email ?? null}
-        onLogin={() => setAuthOpen("login")}
-        onSignup={() => setAuthOpen("signup")}
-        onSignOut={() => void signOut()}
-      />
-      {authOpen ? (
-        <AuthOverlay
-          mode={authOpen}
-          onClose={() => setAuthOpen(null)}
-          onSwitchMode={(m) => setAuthOpen(m)}
-        />
-      ) : null}
-    </>
-  );
+  return null;
 }

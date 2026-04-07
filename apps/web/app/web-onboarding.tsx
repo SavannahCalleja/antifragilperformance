@@ -126,7 +126,7 @@ export function WebOnboarding() {
       await Promise.race([
         refreshProfile(),
         new Promise<void>((_, reject) => {
-          setTimeout(() => reject(new Error("refresh timeout")), 10_000);
+          setTimeout(() => reject(new Error("refresh timeout")), 12_000);
         }),
       ]);
       setSaving(false);

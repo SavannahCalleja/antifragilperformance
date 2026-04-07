@@ -10,10 +10,10 @@ import { DashboardGreeting } from "../dashboard-greeting";
 
 export default function CoachDashboardPage() {
   const router = useRouter();
-  const { session, profile, initializing, signOut } = useAuth();
+  const { session, profile, authReady, signOut } = useAuth();
 
   useEffect(() => {
-    if (initializing) return;
+    if (!authReady) return;
     if (!session) {
       router.replace(loginRedirectPath());
       return;
@@ -28,12 +28,11 @@ export default function CoachDashboardPage() {
       } else {
         router.replace("/");
       }
-      return;
     }
-  }, [initializing, session, profile, router]);
+  }, [authReady, session, profile, router]);
 
   const blocked =
-    initializing ||
+    !authReady ||
     !session ||
     !profile ||
     profileNeedsSetup(profile) ||
