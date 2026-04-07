@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const links = [
   { href: "#home", label: "Home" },
@@ -11,6 +12,7 @@ const links = [
 ] as const;
 
 export function SiteNav() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -21,6 +23,9 @@ export function SiteNav() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /** Marketing anchors (#home, #why-antifragil, …) only exist on `/`. */
+  if (pathname !== "/") return null;
 
   return (
     <header
