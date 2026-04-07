@@ -21,7 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getSupabase } from '../../lib/supabase';
 import { cc } from '../../theme/commandCenter';
 
-const GENDERS = ['Female', 'Male', 'Non-binary', 'Prefer not to say'] as const;
+const GENDERS = ['Female', 'Male'] as const;
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ProfileSetup'>;
 
@@ -45,7 +45,7 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
   const initialName = typeof metaName === 'string' ? metaName : '';
 
   const [fullName, setFullName] = useState(initialName.trim());
-  const [gender, setGender] = useState<string>(GENDERS[0]);
+  const [gender, setGender] = useState<(typeof GENDERS)[number]>(GENDERS[0]);
   const [ageStr, setAgeStr] = useState('');
   const [weightStr, setWeightStr] = useState('');
   const [heightStr, setHeightStr] = useState('');
@@ -54,17 +54,15 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
   const isCoach = mmaLevel === MMA_LEVEL_COACH;
 
   const canFinish = useMemo(() => {
+    if (isCoach) return fullName.trim().length > 0 && GENDERS.includes(gender);
     const age = parsePositiveInt(ageStr);
     const w = parsePositiveFloat(weightStr);
     const h = parsePositiveFloat(heightStr);
-    const basics =
+    return (
       fullName.trim().length > 0 &&
       gender.length > 0 &&
       age !== null &&
-      age <= 120;
-    if (isCoach) return basics;
-    return (
-      basics &&
+      age <= 120 &&
       w !== null &&
       w < 2000 &&
       h !== null &&
@@ -73,16 +71,22 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
   }, [fullName, gender, ageStr, weightStr, heightStr, isCoach]);
 
   const onFinish = async () => {
-    const age = parsePositiveInt(ageStr);
+    const age = isCoach ? null : parsePositiveInt(ageStr);
     const weightLb = isCoach ? null : parsePositiveFloat(weightStr);
     const heightIn = isCoach ? null : parsePositiveFloat(heightStr);
-    if (!userId || !fullName.trim() || age === null || !gender) {
-      Alert.alert('Check fields', 'Enter your name, gender, and age.');
+    if (!userId || !fullName.trim()) {
+      Alert.alert('Check fields', 'Enter your name.');
       return;
     }
-    if (!isCoach && (weightLb === null || heightIn === null)) {
-      Alert.alert('Check fields', 'Enter your weight and height.');
-      return;
+    if (!isCoach) {
+      if (age === null) {
+        Alert.alert('Check fields', 'Enter your name, gender, and age.');
+        return;
+      }
+      if (weightLb === null || heightIn === null) {
+        Alert.alert('Check fields', 'Enter your weight and height.');
+        return;
+      }
     }
 
     const supabase = getSupabase();
@@ -130,11 +134,11 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
             <Text style={styles.backLink}>← Change MMA level</Text>
           </TouchableOpacity>
 
-          <Text style={styles.kicker}>STEP 2</Text>
-          <Text style={styles.headline}>{isCoach ? 'Coach profile' : 'Your bio'}</Text>
+          <Text style={styles.kicker}>{isCoach ? 'FINISH' : 'STEP 2'}</Text>
+          <Text style={styles.headline}>{isCoach ? 'Finish coach setup' : 'Your bio'}</Text>
           <Text style={styles.sub}>
             {isCoach
-              ? 'Name, gender, and age. Weight and height stay off your record. Saving unlocks the team dashboard.'
+              ? 'Age, weight, and height are skipped for coaches. Enter your name and gender to open the team dashboard.'
               : 'Name, gender, age, weight, and height. Saving unlocks the Command Center (profile_setup_complete).'}
           </Text>
 
@@ -165,18 +169,18 @@ export function ProfileSetupScreen({ navigation, route }: Props) {
             })}
           </View>
 
-          <Text style={styles.label}>AGE</Text>
-          <TextInput
-            style={styles.input}
-            value={ageStr}
-            onChangeText={setAgeStr}
-            placeholder="Years"
-            placeholderTextColor={cc.dim}
-            keyboardType="number-pad"
-          />
-
           {!isCoach ? (
             <>
+              <Text style={styles.label}>AGE</Text>
+              <TextInput
+                style={styles.input}
+                value={ageStr}
+                onChangeText={setAgeStr}
+                placeholder="Years"
+                placeholderTextColor={cc.dim}
+                keyboardType="number-pad"
+              />
+
               <Text style={styles.label}>WEIGHT (LB)</Text>
               <TextInput
                 style={styles.input}

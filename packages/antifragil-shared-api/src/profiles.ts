@@ -5,7 +5,8 @@ import type { MmaLevel, ProfileRow, ProfileRole } from './types';
 export type CompletedProfilePayload = {
   full_name: string;
   gender: string;
-  age: number;
+  /** Fighters required; coaches may omit (null in DB if column allows). */
+  age: number | null;
   /** Fighters only; coaches omit (null in DB). */
   weight_lb: number | null;
   height_in: number | null;

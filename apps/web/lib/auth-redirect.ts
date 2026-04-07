@@ -8,3 +8,6 @@ export function getAuthRedirectTo(): string {
   }
   return window.location.origin;
 }
+
+/** Unauthenticated dashboard visits → `/?login=1` opens the login overlay (see `WebAppGate`). */
+export { loginRedirectPath } from "./dashboard-route";

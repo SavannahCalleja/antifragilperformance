@@ -8,7 +8,7 @@ import { isCoachProfile, isFighterProfile, loginRedirectPath } from "../../lib/d
 import { useAuth } from "../auth-provider";
 import { DashboardGreeting } from "../dashboard-greeting";
 
-export default function CoachDashboardPage() {
+export default function FighterDashboardPage() {
   const router = useRouter();
   const { session, profile, initializing, signOut } = useAuth();
 
@@ -22,13 +22,12 @@ export default function CoachDashboardPage() {
       router.replace("/");
       return;
     }
-    if (!isCoachProfile(profile)) {
-      if (isFighterProfile(profile)) {
-        router.replace("/fighter-dashboard");
-      } else {
-        router.replace("/");
-      }
+    if (isCoachProfile(profile)) {
+      router.replace("/coach-dashboard");
       return;
+    }
+    if (!isFighterProfile(profile)) {
+      router.replace("/");
     }
   }, [initializing, session, profile, router]);
 
@@ -37,7 +36,7 @@ export default function CoachDashboardPage() {
     !session ||
     !profile ||
     profileNeedsSetup(profile) ||
-    !isCoachProfile(profile);
+    !isFighterProfile(profile);
 
   if (blocked) {
     return (
@@ -53,17 +52,17 @@ export default function CoachDashboardPage() {
         <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.28em] text-[#FF69B4]">
           Command Center
         </p>
-        <DashboardGreeting variant="coach" />
+        <DashboardGreeting variant="fighter" />
 
         <p className="mt-3 text-sm text-[#E5E4E2]/65">
-          Your team entry point on the web—roster and programming tools align with the mobile
-          Command Center.
+          Your fighter dashboard on the web. Training assignments and streaks stay in sync with the
+          mobile app.
         </p>
 
         <div className="mt-10 rounded-xl border border-white/10 bg-black/30 p-8">
           <p className="text-sm leading-relaxed text-[#E5E4E2]/75">
-            Ground zero: use the Antifragil mobile app for full coach workflows until more web tools
-            ship.
+            Ground zero: use the Antifragil mobile app for today&apos;s session and consistency
+            tracking until more web tools ship.
           </p>
         </div>
 

@@ -11,7 +11,7 @@ import {
 import { getSupabase } from "../lib/supabase";
 import { useAuth } from "./auth-provider";
 
-const GENDERS = ["Female", "Male", "Non-binary", "Prefer not to say"] as const;
+const GENDERS = ["Female", "Male"] as const;
 
 type MmaChoice =
   | typeof MMA_LEVEL_PROFESSIONAL
@@ -40,7 +40,7 @@ export function WebOnboarding() {
   const [step, setStep] = useState<"mma" | "profile">("mma");
   const [mmaChoice, setMmaChoice] = useState<MmaChoice | null>(null);
   const [fullName, setFullName] = useState(initialName.trim());
-  const [gender, setGender] = useState<string>(GENDERS[0]);
+  const [gender, setGender] = useState<(typeof GENDERS)[number]>(GENDERS[0]);
   const [ageStr, setAgeStr] = useState("");
   const [weightStr, setWeightStr] = useState("");
   const [heightStr, setHeightStr] = useState("");
@@ -57,15 +57,15 @@ export function WebOnboarding() {
 
   const basicsValid = useMemo(() => {
     if (mmaChoice === null) return false;
+    if (mmaChoice === MMA_LEVEL_COACH) {
+      return fullName.trim().length > 0 && GENDERS.includes(gender);
+    }
     const age = parsePositiveInt(ageStr);
-    const basics =
-      fullName.trim().length > 0 && age !== null && age <= 120;
-    if (!basics) return false;
-    if (mmaChoice === MMA_LEVEL_COACH) return true;
+    if (!fullName.trim() || age === null || age > 120) return false;
     const w = parsePositiveFloat(weightStr);
     const h = parsePositiveFloat(heightStr);
     return w !== null && w < 2000 && h !== null && h < 120;
-  }, [mmaChoice, fullName, ageStr, weightStr, heightStr]);
+  }, [mmaChoice, fullName, gender, ageStr, weightStr, heightStr]);
 
   const saveBio = async (e: FormEvent) => {
     e.preventDefault();
@@ -80,16 +80,22 @@ export function WebOnboarding() {
       setError("Supabase is not configured.");
       return;
     }
-    const age = parsePositiveInt(ageStr);
+    const age = isCoach ? null : parsePositiveInt(ageStr);
     const weightLb = isCoach ? null : parsePositiveFloat(weightStr);
     const heightIn = isCoach ? null : parsePositiveFloat(heightStr);
-    if (!fullName.trim() || age === null) {
-      setError("Complete your name, gender, and age.");
+    if (!fullName.trim()) {
+      setError("Enter your name.");
       return;
     }
-    if (!isCoach && (weightLb === null || heightIn === null)) {
-      setError("Enter weight and height.");
-      return;
+    if (!isCoach) {
+      if (age === null) {
+        setError("Enter your age.");
+        return;
+      }
+      if (weightLb === null || heightIn === null) {
+        setError("Enter weight and height.");
+        return;
+      }
     }
 
     setSaving(true);
@@ -117,6 +123,8 @@ export function WebOnboarding() {
     setSaving(false);
     if (mmaChoice === MMA_LEVEL_COACH) {
       router.replace("/coach-dashboard");
+    } else {
+      router.replace("/fighter-dashboard");
     }
   };
 
@@ -194,15 +202,15 @@ export function WebOnboarding() {
                 ← Change role
               </button>
               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/50">
-                Step 2
+                {isCoach ? "Finish" : "Step 2"}
               </p>
               <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight">
-                {isCoach ? "Coach profile" : "Your bio"}
+                {isCoach ? "Finish coach setup" : "Your bio"}
               </h1>
               <p className="mb-8 text-sm text-[#E5E4E2]/65">
                 {isCoach
-                  ? "Name, gender, and age only. Saving unlocks the coach dashboard."
-                  : "Name, gender, age, weight, and height. Saving unlocks the main app."}
+                  ? "Weight, height, and age are skipped for coaches. Enter your name and gender to open the team dashboard."
+                  : "Name, gender, age, weight, and height. Saving unlocks the fighter dashboard."}
               </p>
               <form onSubmit={(e) => void saveBio(e)} className="flex flex-col gap-5">
                 <div>
@@ -237,21 +245,21 @@ export function WebOnboarding() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label htmlFor="wo-age" className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#FF69B4]">
-                    Age
-                  </label>
-                  <input
-                    id="wo-age"
-                    inputMode="numeric"
-                    value={ageStr}
-                    onChange={(e) => setAgeStr(e.target.value)}
-                    placeholder="Years"
-                    className="w-full rounded-lg border border-white/15 bg-black/50 px-4 py-3 text-[#E5E4E2] focus:border-[#FF69B4]/55 focus:outline-none focus:ring-2 focus:ring-[#FF69B4]/25"
-                  />
-                </div>
                 {!isCoach ? (
                   <>
+                    <div>
+                      <label htmlFor="wo-age" className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#FF69B4]">
+                        Age
+                      </label>
+                      <input
+                        id="wo-age"
+                        inputMode="numeric"
+                        value={ageStr}
+                        onChange={(e) => setAgeStr(e.target.value)}
+                        placeholder="Years"
+                        className="w-full rounded-lg border border-white/15 bg-black/50 px-4 py-3 text-[#E5E4E2] focus:border-[#FF69B4]/55 focus:outline-none focus:ring-2 focus:ring-[#FF69B4]/25"
+                      />
+                    </div>
                     <div>
                       <label htmlFor="wo-w" className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#FF69B4]">
                         Weight (lb)
@@ -290,7 +298,7 @@ export function WebOnboarding() {
                     ? "Saving…"
                     : isCoach
                       ? "Save & open coach dashboard"
-                      : "Save & enter Command Center"}
+                      : "Save & open fighter dashboard"}
                 </button>
               </form>
             </>

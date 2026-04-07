@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { profileNeedsSetup } from "@antifragil/shared-api";
+import { resolveDashboardHref } from "../lib/dashboard-route";
 import { AuthOverlay, type AuthOverlayMode } from "./auth-overlay";
 import { MarketingLanding } from "./marketing-landing";
 import { useAuth } from "./auth-provider";
@@ -13,19 +14,32 @@ export function WebAppGate() {
   const { session, profile, initializing, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState<AuthOverlayMode | null>(null);
 
+  const dashboardHref = useMemo(() => {
+    if (!session || !profile || profileNeedsSetup(profile)) return null;
+    return resolveDashboardHref(profile);
+  }, [session, profile]);
+
+  useLayoutEffect(() => {
+    if (!dashboardHref) return;
+    router.replace(dashboardHref);
+  }, [dashboardHref, router]);
+
   useEffect(() => {
     if (!session) return;
     queueMicrotask(() => setAuthOpen(null));
   }, [session]);
 
-  /** Coaches with a completed profile use /coach-dashboard instead of the public home shell. */
+  /** `/?login=1` opens the login overlay (dashboard auth guard redirect). */
   useEffect(() => {
-    if (initializing) return;
-    if (!session || !profile || profileNeedsSetup(profile)) return;
-    if (profile.role === "coach") {
-      router.replace("/coach-dashboard");
-    }
-  }, [initializing, session, profile, router]);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("login") !== "1") return;
+    queueMicrotask(() => setAuthOpen("login"));
+    url.searchParams.delete("login");
+    const qs = url.searchParams.toString();
+    const path = qs ? `${url.pathname}?${qs}` : url.pathname;
+    window.history.replaceState({}, "", path || "/");
+  }, []);
 
   if (initializing) {
     return (
@@ -65,6 +79,16 @@ export function WebAppGate() {
         </div>
       );
     }
+  }
+
+  if (dashboardHref) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-[#030303] text-[#FF69B4]">
+        <p className="text-sm font-semibold uppercase tracking-widest">
+          Opening Command Center…
+        </p>
+      </div>
+    );
   }
 
   const signedIn = Boolean(session);
