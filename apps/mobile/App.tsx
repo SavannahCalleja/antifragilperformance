@@ -5,7 +5,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { AuthNavigator } from './src/navigation/AuthNavigator';
+import { OnboardingNavigator } from './src/navigation/OnboardingNavigator';
 import { ProfileMissingScreen } from './src/screens/ProfileMissingScreen';
+import { profileNeedsSetup } from './src/api/commandCenter';
 
 const navTheme = {
   ...DefaultTheme,
@@ -30,8 +32,9 @@ function AppGate() {
     );
   }
 
-  if (session && !profile) {
-    return <ProfileMissingScreen onSignOut={signOut} />;
+  // profile_setup_complete defaults false (trigger); onboarding sets true on final upsert
+  if (session && profileNeedsSetup(profile)) {
+    return <OnboardingNavigator />;
   }
 
   if (session && profile) {

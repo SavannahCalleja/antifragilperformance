@@ -4,10 +4,19 @@ import {
   fetchExercises,
   fetchProfile,
   groupExercisesByCategory,
+  profileNeedsSetup,
+  upsertCompletedProfile,
 } from '@antifragil/shared-api';
 import type { ExerciseRow, ProfileRow, ProgramAssignmentRow, ProgramRow } from '../types/database';
 
-export { fetchProfile, fetchAthleteProfiles, fetchExercises, groupExercisesByCategory };
+export {
+  fetchProfile,
+  fetchAthleteProfiles,
+  fetchExercises,
+  groupExercisesByCategory,
+  profileNeedsSetup,
+  upsertCompletedProfile,
+};
 
 export async function fetchTodayAssignment(
   supabase: SupabaseClient,

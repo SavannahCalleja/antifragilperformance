@@ -13,3 +13,16 @@ export type AppStackParamList = {
   AthleteRoster: undefined;
   ReviewData: undefined;
 };
+
+export type ProfileBasicsForMma = {
+  fullName: string;
+  gender: string;
+  age: number;
+  weightLb: number;
+  heightIn: number;
+};
+
+export type OnboardingStackParamList = {
+  ProfileSetup: undefined;
+  MmaLevel: ProfileBasicsForMma;
+};

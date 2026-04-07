@@ -10,6 +10,7 @@ export const TABLES = {
 } as const;
 
 /** PostgREST `.select()` fragment — keep in sync with DB + RLS-exposed columns */
-export const PROFILE_SELECT = 'id, full_name, role' as const;
+export const PROFILE_SELECT =
+  'id, full_name, role, gender, age, weight_lb, height_in, mma_level, profile_setup_complete' as const;
 
 export const EXERCISE_SELECT = 'id, name, category, description' as const;
