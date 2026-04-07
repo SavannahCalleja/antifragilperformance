@@ -18,7 +18,7 @@ export function WelcomeScreen() {
 
   useEffect(() => {
     if (!isInstalledPwa()) return;
-    setVisible(true);
+    queueMicrotask(() => setVisible(true));
     document.documentElement.style.overflow = "hidden";
     return () => {
       document.documentElement.style.overflow = "";

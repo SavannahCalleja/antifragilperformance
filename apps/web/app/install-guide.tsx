@@ -25,19 +25,21 @@ export function InstallGuide() {
   const [open, setOpen] = useState<boolean | null>(null);
 
   useEffect(() => {
-    try {
-      if (!isIOS() || isStandaloneApp()) {
+    queueMicrotask(() => {
+      try {
+        if (!isIOS() || isStandaloneApp()) {
+          setOpen(false);
+          return;
+        }
+        if (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) {
+          setOpen(false);
+          return;
+        }
+        setOpen(true);
+      } catch {
         setOpen(false);
-        return;
       }
-      if (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) {
-        setOpen(false);
-        return;
-      }
-      setOpen(true);
-    } catch {
-      setOpen(false);
-    }
+    });
   }, []);
 
   const dismiss = useCallback(() => {
