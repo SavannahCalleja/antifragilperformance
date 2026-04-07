@@ -32,7 +32,7 @@ function AppGate() {
     );
   }
 
-  // profile_setup_complete defaults false (trigger); onboarding sets true on final upsert
+  // Email verify → session + profiles row; if profile_setup_complete is false, MMA first then bio (single upsert unlocks app)
   if (session && profileNeedsSetup(profile)) {
     return <OnboardingNavigator />;
   }

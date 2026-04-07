@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { getAuthRedirectTo } from "../lib/auth-redirect";
 import { getSupabase } from "../lib/supabase";
 
 export type AuthOverlayMode = "login" | "signup";
@@ -44,6 +45,8 @@ export function AuthOverlay({ mode, onClose, onSwitchMode }: Props) {
     setSubmitting(true);
     try {
       if (mode === "login") {
+        // Password sign-in returns a session here; Supabase does not accept `redirectTo` on this call.
+        // Dynamic `window.location.origin` is used on sign-up via `emailRedirectTo` for confirmation links.
         const { error: err } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -58,10 +61,12 @@ export function AuthOverlay({ mode, onClose, onSwitchMode }: Props) {
           setError("Enter your name.");
           return;
         }
+        const redirectTo = getAuthRedirectTo();
         const { error: err } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
+            emailRedirectTo: redirectTo || undefined,
             data: {
               full_name: fullName.trim(),
             },

@@ -23,8 +23,8 @@ function mmaLevelForDatabase(raw: string): { value: MmaLevel } | { error: string
 }
 
 /**
- * True when the user should see profile + MMA onboarding.
- * Treat as incomplete unless `profile_setup_complete` is exactly true (covers DB default false and null/missing).
+ * True when the user should not see the main app: no profile row yet, or `profile_setup_complete` is not true.
+ * Flow: MMA tier first (client-only until bio), then bio + tier saved together with `profile_setup_complete: true`.
  */
 export function profileNeedsSetup(profile: ProfileRow | null): boolean {
   if (!profile) return true;

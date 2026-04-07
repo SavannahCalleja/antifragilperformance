@@ -1,108 +1,50 @@
-import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
 import { MMA_LEVEL_AMATEUR, MMA_LEVEL_PROFESSIONAL } from '@antifragil/shared-api';
-import { upsertCompletedProfile } from '../../api/commandCenter';
-import { useAuth } from '../../context/AuthContext';
-import { getSupabase } from '../../lib/supabase';
 import { cc } from '../../theme/commandCenter';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'MmaLevel'>;
 
 type MmaChoice = typeof MMA_LEVEL_PROFESSIONAL | typeof MMA_LEVEL_AMATEUR;
 
-export function MmaLevelScreen({ route }: Props) {
-  const { fullName, gender, age, weightLb, heightIn } = route.params;
-  const { session, profile, refreshProfile } = useAuth();
-  const userId = session?.user?.id;
-  const [saving, setSaving] = useState(false);
-  const [picked, setPicked] = useState<MmaChoice | null>(null);
-
-  const save = async (mma_level: MmaChoice) => {
-    if (!userId || saving) return;
-    const supabase = getSupabase();
-    if (!supabase) {
-      Alert.alert('Configuration', 'Supabase is not configured on this build.');
-      return;
-    }
-
-    setSaving(true);
-    setPicked(mma_level);
-
-    const role =
-      profile?.role === 'coach' || profile?.role === 'athlete' ? profile.role : 'athlete';
-
-    const { error } = await upsertCompletedProfile(supabase, userId, {
-      full_name: fullName,
-      gender,
-      age,
-      weight_lb: weightLb,
-      height_in: heightIn,
-      mma_level,
-      role,
-    });
-
-    if (error) {
-      setSaving(false);
-      setPicked(null);
-      Alert.alert('Could not save', error.message);
-      return;
-    }
-
-    await refreshProfile();
-    setSaving(false);
+export function MmaLevelScreen({ navigation }: Props) {
+  const goBio = (mmaLevel: MmaChoice) => {
+    navigation.navigate('ProfileSetup', { mmaLevel });
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom', 'left', 'right']}>
       <View style={styles.inner}>
-        <Text style={styles.kicker}>STEP 2</Text>
+        <Text style={styles.kicker}>STEP 1</Text>
         <Text style={styles.title}>MMA LEVEL</Text>
-        <Text style={styles.sub}>Choose one. This locks your competitive tier in the system.</Text>
+        <Text style={styles.sub}>
+          Choose your tier first. Next you&apos;ll add your bio—only then you enter the Command
+          Center.
+        </Text>
 
         <TouchableOpacity
           style={styles.cardPro}
-          onPress={() => save(MMA_LEVEL_PROFESSIONAL)}
+          onPress={() => goBio(MMA_LEVEL_PROFESSIONAL)}
           activeOpacity={0.92}
-          disabled={saving}
           accessibilityRole="button"
           accessibilityLabel="Professional"
         >
-          {saving && picked === MMA_LEVEL_PROFESSIONAL ? (
-            <ActivityIndicator color="#000" size="large" />
-          ) : (
-            <>
-              <Text style={styles.cardProLabel}>PROFESSIONAL</Text>
-              <Text style={styles.cardProHint}>Paid bouts · pro ruleset · full contact career</Text>
-            </>
-          )}
+          <Text style={styles.cardProLabel}>PROFESSIONAL</Text>
+          <Text style={styles.cardProHint}>Paid bouts · pro ruleset · full contact career</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.cardAm}
-          onPress={() => save(MMA_LEVEL_AMATEUR)}
+          onPress={() => goBio(MMA_LEVEL_AMATEUR)}
           activeOpacity={0.92}
-          disabled={saving}
           accessibilityRole="button"
           accessibilityLabel="Amateur"
         >
-          {saving && picked === MMA_LEVEL_AMATEUR ? (
-            <ActivityIndicator color="#fff" size="large" />
-          ) : (
-            <>
-              <Text style={styles.cardAmLabel}>AMATEUR</Text>
-              <Text style={styles.cardAmHint}>Development · sanctioned amateur · skill building</Text>
-            </>
-          )}
+          <Text style={styles.cardAmLabel}>AMATEUR</Text>
+          <Text style={styles.cardAmHint}>Development · sanctioned amateur · skill building</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

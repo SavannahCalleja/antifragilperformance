@@ -78,6 +78,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loadProfile]);
 
+  /** After email verification in another tab, coming back re-fetches session + profile. */
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase || typeof document === "undefined") return;
+
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      queueMicrotask(() => {
+        void (async () => {
+          const {
+            data: { session: s },
+          } = await supabase.auth.getSession();
+          setSession(s);
+          if (s?.user?.id) await loadProfile(s.user.id);
+          else setProfile(null);
+        })();
+      });
+    };
+
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [loadProfile]);
+
   const refreshProfile = useCallback(async () => {
     if (session?.user?.id) await loadProfile(session.user.id);
   }, [session, loadProfile]);

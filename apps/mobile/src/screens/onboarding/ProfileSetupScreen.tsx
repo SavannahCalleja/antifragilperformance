@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -14,7 +15,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/types';
+import { upsertCompletedProfile } from '../../api/commandCenter';
 import { useAuth } from '../../context/AuthContext';
+import { getSupabase } from '../../lib/supabase';
 import { cc } from '../../theme/commandCenter';
 
 const GENDERS = ['Female', 'Male', 'Non-binary', 'Prefer not to say'] as const;
@@ -33,8 +36,10 @@ function parsePositiveFloat(raw: string): number | null {
   return n;
 }
 
-export function ProfileSetupScreen({ navigation }: Props) {
-  const { session, signOut } = useAuth();
+export function ProfileSetupScreen({ navigation, route }: Props) {
+  const { mmaLevel } = route.params;
+  const { session, profile, refreshProfile, signOut } = useAuth();
+  const userId = session?.user?.id;
   const metaName = session?.user?.user_metadata?.full_name;
   const initialName = typeof metaName === 'string' ? metaName : '';
 
@@ -43,8 +48,9 @@ export function ProfileSetupScreen({ navigation }: Props) {
   const [ageStr, setAgeStr] = useState('');
   const [weightStr, setWeightStr] = useState('');
   const [heightStr, setHeightStr] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const canContinue = useMemo(() => {
+  const canFinish = useMemo(() => {
     const age = parsePositiveInt(ageStr);
     const w = parsePositiveFloat(weightStr);
     const h = parsePositiveFloat(heightStr);
@@ -60,11 +66,12 @@ export function ProfileSetupScreen({ navigation }: Props) {
     );
   }, [fullName, gender, ageStr, weightStr, heightStr]);
 
-  const onContinue = () => {
+  const onFinish = async () => {
     const age = parsePositiveInt(ageStr);
     const weightLb = parsePositiveFloat(weightStr);
     const heightIn = parsePositiveFloat(heightStr);
     if (
+      !userId ||
       !fullName.trim() ||
       age === null ||
       weightLb === null ||
@@ -74,13 +81,35 @@ export function ProfileSetupScreen({ navigation }: Props) {
       Alert.alert('Check fields', 'Enter your name, gender, age, weight, and height.');
       return;
     }
-    navigation.navigate('MmaLevel', {
-      fullName: fullName.trim(),
+
+    const supabase = getSupabase();
+    if (!supabase) {
+      Alert.alert('Configuration', 'Supabase is not configured on this build.');
+      return;
+    }
+
+    setSubmitting(true);
+    const role =
+      profile?.role === 'coach' || profile?.role === 'athlete' ? profile.role : 'athlete';
+
+    const { error } = await upsertCompletedProfile(supabase, userId, {
+      full_name: fullName.trim(),
       gender,
       age,
-      weightLb,
-      heightIn,
+      weight_lb: weightLb,
+      height_in: heightIn,
+      mma_level: mmaLevel,
+      role,
     });
+
+    if (error) {
+      setSubmitting(false);
+      Alert.alert('Could not save', error.message);
+      return;
+    }
+
+    await refreshProfile();
+    setSubmitting(false);
   };
 
   return (
@@ -94,10 +123,15 @@ export function ProfileSetupScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.kicker}>COMMAND CENTER</Text>
-          <Text style={styles.headline}>Build your fighter profile</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('MmaLevel')} hitSlop={12}>
+            <Text style={styles.backLink}>← Change MMA level</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.kicker}>STEP 2</Text>
+          <Text style={styles.headline}>Your bio</Text>
           <Text style={styles.sub}>
-            Name, gender, age, weight, and height sync to your account.
+            Name, gender, age, weight, and height. Saving unlocks the Command Center
+            (profile_setup_complete).
           </Text>
 
           <Text style={styles.label}>NAME</Text>
@@ -158,11 +192,15 @@ export function ProfileSetupScreen({ navigation }: Props) {
           />
 
           <TouchableOpacity
-            style={[styles.primary, !canContinue && styles.primaryDisabled]}
-            onPress={onContinue}
-            disabled={!canContinue}
+            style={[styles.primary, (!canFinish || submitting) && styles.primaryDisabled]}
+            onPress={() => void onFinish()}
+            disabled={!canFinish || submitting}
           >
-            <Text style={styles.primaryText}>CONTINUE</Text>
+            {submitting ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={styles.primaryText}>SAVE & ENTER COMMAND CENTER</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.signOut} onPress={signOut} hitSlop={12}>
@@ -178,12 +216,18 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: cc.bg },
   flex: { flex: 1 },
   scroll: { paddingHorizontal: 22, paddingBottom: 32, maxWidth: 440, width: '100%', alignSelf: 'center' },
+  backLink: {
+    color: cc.accent,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 16,
+    marginTop: 4,
+  },
   kicker: {
     color: cc.accent,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 4,
-    marginTop: 8,
     marginBottom: 12,
   },
   headline: {
@@ -235,7 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   primaryDisabled: { opacity: 0.4 },
-  primaryText: { color: '#000', fontWeight: '900', letterSpacing: 2, fontSize: 15 },
+  primaryText: { color: '#000', fontWeight: '900', letterSpacing: 1, fontSize: 13 },
   signOut: { alignSelf: 'center', marginTop: 20, padding: 8 },
   signOutText: { color: cc.muted, fontSize: 14, fontWeight: '600' },
 });

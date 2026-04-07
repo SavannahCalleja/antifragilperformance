@@ -11,6 +11,8 @@ import { useAuth } from "./auth-provider";
 
 const GENDERS = ["Female", "Male", "Non-binary", "Prefer not to say"] as const;
 
+type MmaChoice = typeof MMA_LEVEL_PROFESSIONAL | typeof MMA_LEVEL_AMATEUR;
+
 function parsePositiveInt(raw: string): number | null {
   const n = parseInt(raw.replace(/[^\d]/g, ""), 10);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -29,7 +31,8 @@ export function WebOnboarding() {
   const metaName = session?.user?.user_metadata?.full_name;
   const initialName = typeof metaName === "string" ? metaName : "";
 
-  const [step, setStep] = useState<"profile" | "mma">("profile");
+  const [step, setStep] = useState<"mma" | "profile">("mma");
+  const [mmaChoice, setMmaChoice] = useState<MmaChoice | null>(null);
   const [fullName, setFullName] = useState(initialName.trim());
   const [gender, setGender] = useState<string>(GENDERS[0]);
   const [ageStr, setAgeStr] = useState("");
@@ -38,7 +41,14 @@ export function WebOnboarding() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const pickMma = (level: MmaChoice) => {
+    setError(null);
+    setMmaChoice(level);
+    setStep("profile");
+  };
+
   const basicsValid =
+    mmaChoice !== null &&
     fullName.trim().length > 0 &&
     (() => {
       const age = parsePositiveInt(ageStr);
@@ -54,14 +64,13 @@ export function WebOnboarding() {
       );
     })();
 
-  const goMma = (e: FormEvent) => {
+  const saveBio = async (e: FormEvent) => {
     e.preventDefault();
-    if (!basicsValid) return;
-    setError(null);
-    setStep("mma");
-  };
-
-  const saveMma = async (mma_level: typeof MMA_LEVEL_PROFESSIONAL | typeof MMA_LEVEL_AMATEUR) => {
+    if (!mmaChoice) {
+      setError("Choose your MMA level first.");
+      setStep("mma");
+      return;
+    }
     if (!userId || saving) return;
     const supabase = getSupabase();
     if (!supabase) {
@@ -72,7 +81,7 @@ export function WebOnboarding() {
     const weightLb = parsePositiveFloat(weightStr);
     const heightIn = parsePositiveFloat(heightStr);
     if (!fullName.trim() || age === null || weightLb === null || heightIn === null) {
-      setError("Complete all profile fields.");
+      setError("Complete all bio fields.");
       return;
     }
 
@@ -87,7 +96,7 @@ export function WebOnboarding() {
       age,
       weight_lb: weightLb,
       height_in: heightIn,
-      mma_level,
+      mma_level: mmaChoice,
       role,
     });
 
@@ -108,15 +117,67 @@ export function WebOnboarding() {
           <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.28em] text-[#FF69B4]">
             Command Center
           </p>
-          {step === "profile" ? (
+          {step === "mma" ? (
             <>
-              <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight">
-                Build your fighter profile
-              </h1>
-              <p className="mb-8 text-sm text-[#E5E4E2]/65">
-                Name, gender, age, weight, and height sync to your account.
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/50">
+                Step 1
               </p>
-              <form onSubmit={goMma} className="flex flex-col gap-5">
+              <h1 className="mb-2 font-sans text-2xl font-black uppercase tracking-wide text-white">
+                MMA level
+              </h1>
+              <p className="mb-8 text-sm text-white/55">
+                After you verify your email, pick your tier here first. Next you&apos;ll add your
+                bio—only that save sets profile_setup_complete and unlocks the app.
+              </p>
+              {error ? <p className="mb-4 text-sm text-red-400">{error}</p> : null}
+              <div className="flex flex-col gap-4">
+                <button
+                  type="button"
+                  onClick={() => pickMma(MMA_LEVEL_PROFESSIONAL)}
+                  className="min-h-[140px] rounded border-[3px] border-white bg-white px-6 py-8 text-left transition-opacity"
+                >
+                  <span className="block font-sans text-xl font-black uppercase tracking-widest text-black">
+                    Professional
+                  </span>
+                  <span className="mt-2 block text-sm font-semibold text-black/55">
+                    Paid bouts · pro ruleset · full contact career
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pickMma(MMA_LEVEL_AMATEUR)}
+                  className="min-h-[140px] rounded border-[3px] border-white bg-black px-6 py-8 text-left transition-opacity"
+                >
+                  <span className="block font-sans text-xl font-black uppercase tracking-widest text-white">
+                    Amateur
+                  </span>
+                  <span className="mt-2 block text-sm font-semibold text-white/55">
+                    Development · sanctioned amateur · skill building
+                  </span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("mma");
+                  setMmaChoice(null);
+                  setError(null);
+                }}
+                className="mb-6 text-left text-sm font-semibold text-[#FF69B4] hover:underline"
+              >
+                ← Change MMA level
+              </button>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-white/50">
+                Step 2
+              </p>
+              <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight">Your bio</h1>
+              <p className="mb-8 text-sm text-[#E5E4E2]/65">
+                Name, gender, age, weight, and height. Saving unlocks the main app.
+              </p>
+              <form onSubmit={(e) => void saveBio(e)} className="flex flex-col gap-5">
                 <div>
                   <label htmlFor="wo-name" className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#FF69B4]">
                     Name
@@ -191,53 +252,12 @@ export function WebOnboarding() {
                 {error ? <p className="text-sm text-red-400">{error}</p> : null}
                 <button
                   type="submit"
-                  disabled={!basicsValid}
+                  disabled={!basicsValid || saving}
                   className="btn-join min-h-12 rounded-md text-sm font-semibold uppercase tracking-wide disabled:opacity-40"
                 >
-                  Continue
+                  {saving ? "Saving…" : "Save & enter Command Center"}
                 </button>
               </form>
-            </>
-          ) : (
-            <>
-              <h1 className="mb-2 font-sans text-2xl font-black uppercase tracking-wide text-white">
-                MMA level
-              </h1>
-              <p className="mb-8 text-sm text-white/55">
-                Choose one. Values are saved in lowercase to match your database constraint.
-              </p>
-              {error ? <p className="mb-4 text-sm text-red-400">{error}</p> : null}
-              <div className="flex flex-col gap-4">
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void saveMma(MMA_LEVEL_PROFESSIONAL)}
-                  className="min-h-[140px] rounded border-[3px] border-white bg-white px-6 py-8 text-left transition-opacity disabled:opacity-60"
-                >
-                  <span className="block font-sans text-xl font-black uppercase tracking-widest text-black">
-                    Professional
-                  </span>
-                  <span className="mt-2 block text-sm font-semibold text-black/55">
-                    Paid bouts · pro ruleset · full contact career
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void saveMma(MMA_LEVEL_AMATEUR)}
-                  className="min-h-[140px] rounded border-[3px] border-white bg-black px-6 py-8 text-left transition-opacity disabled:opacity-60"
-                >
-                  <span className="block font-sans text-xl font-black uppercase tracking-widest text-white">
-                    Amateur
-                  </span>
-                  <span className="mt-2 block text-sm font-semibold text-white/55">
-                    Development · sanctioned amateur · skill building
-                  </span>
-                </button>
-              </div>
-              {saving ? (
-                <p className="mt-6 text-center text-sm text-[#E5E4E2]/60">Saving…</p>
-              ) : null}
             </>
           )}
           <button

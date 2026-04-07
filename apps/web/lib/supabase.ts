@@ -13,7 +13,12 @@ export function getSupabase(): SupabaseClient | null {
     return null;
   }
   if (!client) {
-    client = createClient(url, key);
+    client = createClient(url, key, {
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true,
+      },
+    });
   }
   return client;
 }

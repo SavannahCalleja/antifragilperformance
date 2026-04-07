@@ -19,21 +19,21 @@ const headerScreen = {
 export function OnboardingNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName="ProfileSetup"
+      initialRouteName="MmaLevel"
       screenOptions={{
         ...headerScreen,
         title: '',
       }}
     >
       <Stack.Screen
-        name="ProfileSetup"
-        component={ProfileSetupScreen}
-        options={{ title: 'Profile setup' }}
-      />
-      <Stack.Screen
         name="MmaLevel"
         component={MmaLevelScreen}
-        options={{ title: 'MMA level', headerBackTitle: 'Profile' }}
+        options={{ title: 'MMA level' }}
+      />
+      <Stack.Screen
+        name="ProfileSetup"
+        component={ProfileSetupScreen}
+        options={{ title: 'Your bio', headerBackTitle: 'MMA level' }}
       />
     </Stack.Navigator>
   );

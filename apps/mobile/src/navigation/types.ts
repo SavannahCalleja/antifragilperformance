@@ -14,15 +14,10 @@ export type AppStackParamList = {
   ReviewData: undefined;
 };
 
-export type ProfileBasicsForMma = {
-  fullName: string;
-  gender: string;
-  age: number;
-  weightLb: number;
-  heightIn: number;
-};
+import type { MmaLevel } from '@antifragil/shared-api';
 
 export type OnboardingStackParamList = {
-  ProfileSetup: undefined;
-  MmaLevel: ProfileBasicsForMma;
+  /** First step after email verify: tier before bio (profile_setup_complete stays false until bio save). */
+  MmaLevel: undefined;
+  ProfileSetup: { mmaLevel: MmaLevel };
 };

@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
 import { fetchProfile } from '../api/commandCenter';
 import { getSupabase } from '../lib/supabase';
@@ -74,9 +75,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [loadProfile]);
 
+  /** Re-sync session + profile when returning from the browser (e.g. email verification link). */
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const onAppStateChange = async (state: AppStateStatus) => {
+      if (state !== 'active') return;
+      const {
+        data: { session: s },
+      } = await supabase.auth.getSession();
+      setSession(s);
+      if (s?.user?.id) await loadProfile(s.user.id);
+      else setProfile(null);
+    };
+
+    const sub = AppState.addEventListener('change', onAppStateChange);
+    return () => sub.remove();
+  }, [loadProfile]);
+
   const refreshProfile = useCallback(async () => {
     if (session?.user?.id) await loadProfile(session.user.id);
-  }, [session?.user?.id, loadProfile]);
+  }, [session, loadProfile]);
 
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
