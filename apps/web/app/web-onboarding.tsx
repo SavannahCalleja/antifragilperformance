@@ -119,12 +119,21 @@ export function WebOnboarding() {
       return;
     }
 
-    await refreshProfile();
-    setSaving(false);
-    if (mmaChoice === MMA_LEVEL_COACH) {
-      router.replace("/coach-dashboard");
-    } else {
-      router.replace("/fighter-dashboard");
+    const dashboard =
+      mmaChoice === MMA_LEVEL_COACH ? "/coach-dashboard" : "/fighter-dashboard";
+
+    try {
+      await Promise.race([
+        refreshProfile(),
+        new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error("refresh timeout")), 10_000);
+        }),
+      ]);
+      setSaving(false);
+      router.replace(dashboard);
+    } catch {
+      setSaving(false);
+      window.location.assign(dashboard);
     }
   };
 

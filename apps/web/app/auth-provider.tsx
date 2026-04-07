@@ -48,16 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     /** False after this effect cleans up (incl. React Strict Mode remount). Avoids stuck loading. */
     let active = true;
 
-    const safetyTimer = window.setTimeout(() => {
-      setInitializing((stillLoading) => {
-        if (!stillLoading) return stillLoading;
-        console.warn(
-          "[AuthProvider] Session init is taking too long; continuing without a session. Check network and Supabase env.",
-        );
-        return false;
-      });
-    }, 12_000);
-
     void (async () => {
       try {
         const {
@@ -77,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         }
       } finally {
-        window.clearTimeout(safetyTimer);
         if (active) setInitializing(false);
       }
     })();
@@ -95,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false;
-      window.clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, [loadProfile]);
@@ -123,9 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [loadProfile]);
 
+  /** Always reads the current Supabase session — avoids a stale React `session` after slow init or timeouts. */
   const refreshProfile = useCallback(async () => {
-    if (session?.user?.id) await loadProfile(session.user.id);
-  }, [session, loadProfile]);
+    const supabase = getSupabase();
+    if (!supabase) return;
+    const {
+      data: { session: s },
+    } = await supabase.auth.getSession();
+    const uid = s?.user?.id;
+    if (!uid) return;
+    await loadProfile(uid);
+  }, [loadProfile]);
 
   const signOut = useCallback(async () => {
     const supabase = getSupabase();
