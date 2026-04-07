@@ -1,6 +1,7 @@
 "use client";
 
 import { AppSection } from "./app-section";
+import { SiteNav } from "./site-nav";
 
 function Roman({ children }: { children: React.ReactNode }) {
   return <span className="roman-numeral">{children}</span>;
@@ -56,6 +57,7 @@ export function MarketingLanding({
 }: MarketingLandingProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-black text-[#E5E4E2]">
+      <SiteNav />
       <main className="flex w-full flex-1 flex-col">
         <section
           id="home"

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "./auth-provider";
 import { InstallGuide } from "./install-guide";
-import { SiteNav } from "./site-nav";
 import { WelcomeScreen } from "./welcome-screen";
 import "./globals.css";
 
@@ -46,7 +45,6 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <AuthProvider>
           <WelcomeScreen />
-          <SiteNav />
           {children}
           <InstallGuide />
         </AuthProvider>
